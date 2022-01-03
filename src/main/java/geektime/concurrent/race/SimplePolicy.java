@@ -1,8 +1,9 @@
 package geektime.concurrent.race;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class SimplePolicy {
 	
@@ -32,10 +33,10 @@ public class SimplePolicy {
 		}
 		
 		ssd.getGenSig().await();
-		
+
+		//System.out.println("随机数个数为：" + ssd.getScore().size());
 		long genTime = System.currentTimeMillis();
 		System.out.println("产生随机数时长: " + (genTime - startTime));
-		
 
 		for (int tp = 0; tp < computeThreadInPool; tp++) {
 			SimpleDivideCompute simpleDiv = new SimpleDivideCompute(ssd, SimpleShareData.COUNT / computeThreadInPool, tp);
@@ -43,10 +44,9 @@ public class SimplePolicy {
 		}
 		ssd.getCompSig().await();
 		
-		Integer[] box = ssd.getShare().toArray(new Integer[ssd.getShare().size()]);
-		Arrays.sort(box);
+		List<Integer> box = ssd.getShare().parallelStream().parallel().sorted().collect(Collectors.toList());
 		for (int i = 0; i < SimpleShareData.BUFSIZE; i++) {
-			ssd.getTop()[i] = box[box.length - i - 1];
+			ssd.getTop()[i] = box.get(box.size() - i - 1);
 		}
 		printTop();
 		

@@ -1,8 +1,7 @@
 package geektime.concurrent.race;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SimpleDivideCompute implements ComputeRunnable {
 
@@ -24,16 +23,14 @@ public class SimpleDivideCompute implements ComputeRunnable {
 	@Override
 	public void go() {
 		// System.out.println("开始计算随机数: " + size + " " + offset);
-		int[] alist = new int[size];
-		for (int i = 0; i < size; i++) {
-			alist[i] = ssd.getScore().indexOf(offset * size + i);
-		}
+		List<Integer> alist = ssd.getScore().subList(offset * size, offset * size + size)
+				.parallelStream().parallel().sorted().collect(Collectors.toList());
 		
 		for (int i = 0; i < SimpleShareData.BUFSIZE * size / SimpleShareData.COUNT; i++) {
 			//System.out.println("随机数: " + alist[alist.length - i - 1]);
-			ssd.addExchange(alist[alist.length - i - 1]);
+			ssd.addExchange(alist.get(alist.size() - i - 1));
 		}
-		ssd.getCompSig().countDown();;
+		ssd.getCompSig().countDown();
 		//System.out.println("计算随机数完毕: " + size + " " + SimpleShareData.BUFSIZE * size / SimpleShareData.COUNT);
 	}
 }

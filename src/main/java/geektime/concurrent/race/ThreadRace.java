@@ -58,7 +58,7 @@ public class ThreadRace {
 		long totalSimple = sp.go();
 		
 		double rate = totalSimple / totalTime;
-		System.out.println("自定义A和基准比较: " + new Double(rate).toString());
+		System.out.println("自定义A和基准比较: " + rate);
 	}
 	
 	BaseShareData bsd;
