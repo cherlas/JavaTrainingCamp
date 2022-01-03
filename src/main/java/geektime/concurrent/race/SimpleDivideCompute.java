@@ -25,11 +25,9 @@ public class SimpleDivideCompute implements ComputeRunnable {
 	public void go() {
 		// System.out.println("开始计算随机数: " + size + " " + offset);
 		int[] alist = new int[size];
-		List<Integer> alist = new ArrayList<>();
 		for (int i = 0; i < size; i++) {
 			alist[i] = ssd.getScore().indexOf(offset * size + i);
 		}
-		alist.stream().forEach
 		
 		for (int i = 0; i < SimpleShareData.BUFSIZE * size / SimpleShareData.COUNT; i++) {
 			//System.out.println("随机数: " + alist[alist.length - i - 1]);
