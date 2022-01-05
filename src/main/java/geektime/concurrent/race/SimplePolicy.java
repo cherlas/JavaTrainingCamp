@@ -1,8 +1,9 @@
 package geektime.concurrent.race;
 
+import io.netty.util.concurrent.DefaultThreadFactory;
+
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class SimplePolicy {
@@ -10,18 +11,25 @@ public class SimplePolicy {
 	final int genThreadInPool = 4; //不超过8
 	final int computeThreadInPool = 8; //不超过16
 	SimpleShareData ssd;
+
+	private ThreadPoolExecutor genThreadPool;
+	private ThreadPoolExecutor computeThreadPool;
 	
 	public SimplePolicy() {
 		ssd = new SimpleShareData();
 		ssd.initGenSignals(genThreadInPool);
 		ssd.initCompSignals(computeThreadInPool);
 		ssd.initExchange();
+		initThreads();
+	}
+
+	private void initThreads() {
+		ThreadFactory factory = Executors.defaultThreadFactory();
+		genThreadPool = new ThreadPoolExecutor(genThreadInPool, genThreadInPool, 0L, TimeUnit.MILLISECONDS, new SynchronousQueue<>(), factory);
+		computeThreadPool = new ThreadPoolExecutor(computeThreadInPool, computeThreadInPool, 0L, TimeUnit.MILLISECONDS, new SynchronousQueue<>(), factory);
 	}
 
 	public long go() throws Exception {
-		ExecutorService genThreadPool = Executors.newFixedThreadPool(genThreadInPool);
-		ExecutorService computeThreadPool = Executors.newFixedThreadPool(computeThreadInPool);
-		
 		//使用自定义方法A计算
 		long startTime = System.currentTimeMillis();
 		System.out.println("开始自定义A方法计算计时: " + startTime);
@@ -55,7 +63,7 @@ public class SimplePolicy {
 		
 		computeThreadPool.shutdown();
 		genThreadPool.shutdown();
-		return sortTime - genTime;
+		return sortTime - startTime;
 	}
     void printTop() {
     	System.out.println("前10成绩为:");
